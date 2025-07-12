@@ -1,69 +1,104 @@
-# Task Management 
+# Task Management Application (TAM)
 
 A modern, full-stack task management system built with React, Spring Boot, PostgreSQL, and Keycloak authentication.
 
 ![Project Status](https://img.shields.io/badge/Status-Production%20Ready-green)
-![Frontend](**postgres** - PostgreSQL database
-   - Port: 5433 (external), 5432 (internal)
-   - Volume: `postgres_dev_data`
-   - Database: `task_manager`
-   - Health check: `pg_isready`
-
-2. **keycloak** - Authentication server  
-   - Port: 8080
-   - Volume: `keycloak_dev_data`
-   - Realm: Auto-imported with user registration enabled
-   - Default groups: `default_group` with `manage_task` role
-
-3. **backend-dev** - Spring Boot API
-   - Port: 8084
-   - Dependencies: postgres, keycloak
-   - Features: JWT validation, HikariCP connection pool, DevTools
-
-4. **frontend-dev** - React application
-   - Port: 5174 (external), 5173 (internal) 
-   - Dependencies: backend-dev
-   - Features: Vite dev server, hot reload, Tailwind CSSbadge/Frontend-React%2018-blue)
+![Frontend](https://img.shields.io/badge/Frontend-React%2018-blue)
 ![Backend](https://img.shields.io/badge/Backend-Spring%20Boot%203.5-green)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL%2016-blue)
 ![Authentication](https://img.shields.io/badge/Auth-Keycloak%2026.3.1-red)
 
-## 🚀 Features
+## 🚀 Quick Start
 
-### ✅ Implemented Features 
+### Prerequisites
 
-#### **User Authentication**
+Before running this project, make sure you have the following installed:
+
+- **Docker** (version 20.0 or higher)
+- **Docker Compose** (version 2.0 or higher)
+- **Git** (for cloning the repository)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/M7MDSG76/task-manager.git
+cd task-manager
+```
+
+### 2. Start the Application
+
+```bash
+# Start all services (development environment)
+docker-compose -f docker-compose.dev.yml up -d
+
+# Check service status
+docker-compose -f docker-compose.dev.yml ps
+```
+
+### 3. Access the Application
+
+Once all containers are running use postman collection ([POSTMAN](https://www.postman.com/alghanmimo/task-manager-ws/collection/75xnrcn/taskmanager)) to test APIs or access the Frontend directly:
+
+- **Frontend**: http://localhost:5174
+- **Backend API**: http://localhost:8084/task-management/api/v1
+- **Backend Health**: http://localhost:8084/task-management/actuator/health
+- **Keycloak Admin**: http://localhost:8080/admin (admin/admin123)
+- **Database**: localhost:5433 (postgres/postgres, database: task_manager)
+
+### 4. Login Credentials
+
+**Keycloak Admin:**
+- Username: `admin`
+- Password: `admin123`
+
+**Application Users** (auto-created via Keycloak registration):
+- Users register directly through the application
+- All new users automatically assigned to `default_group` with `manage_task` role
+- User registration is enabled in Keycloak
+
+---
+
+---
+
+## ✅ Features Implemented
+
+### **User Authentication (Complete)**
 - ✅ Secure user registration and login via Keycloak
 - ✅ JWT token-based authentication
 - ✅ OAuth2/OIDC integration
 
-#### **Task Management**
+### **Task Management (Complete)**
 - ✅ Create, edit, delete, and view tasks
 - ✅ Task properties: title, description, priority (Low/Medium/High), status (Pending/In-Progress/Completed)
 - ✅ Advanced filtering by priority and status
 - ✅ **Bonus**: Pagination and sorting
+- ✅ **Bonus**: Advanced search functionality
 
-#### **API Design**
+### **API Design (Complete)**
 - ✅ RESTful APIs for all operations
 - ✅ Comprehensive task CRUD operations
+- ✅ Separate endpoints for filtering and search
 
-#### **Technical Requirements**
+### **Technical Requirements (Complete)**
 - ✅ Java with Spring Boot framework
 - ✅ Clean, modular, and well-documented code
 - ✅ React frontend with modern UI
 - ✅ Forms for authentication and task management
 
-#### **Database**
+### **Database (Complete)**
 - ✅ PostgreSQL relational database
 - ✅ Proper schema for user and task data
+- ✅ Foreign key relationships and constraints
 
-#### **DevOps**
+### **DevOps (Complete)**
 - ✅ Docker containerization
 - ✅ Docker Compose environment setup
+- ✅ **Bonus**: GitHub Actions CI/CD pipeline
 
-#### **Documentation**
+### **Documentation (Complete)**
 - ✅ System Design Document
 - ✅ Database ERD
+- ✅ Comprehensive README with setup instructions
 
 ## 🏗️ Architecture
 
@@ -120,55 +155,7 @@ A modern, full-stack task management system built with React, Spring Boot, Postg
 - **Web Server**: Nginx (for React app)
 - **Networking**: Docker networks with service discovery
 
-## 📋 Prerequisites
-
-Before running this project, make sure you have the following installed:
-
-- **Docker** (version 20.0 or higher)
-- **Docker Compose** (version 2.0 or higher)
-- **Git** (for cloning the repository)
-
-## 🚀 Quick Start
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd task-manager
-```
-
-### 2. Start the Application
-
-```bash
-# Start all services (development environment)
-docker-compose -f docker-compose.dev.yml up -d
-
-# Check service status
-docker-compose -f docker-compose.dev.yml ps
-```
-
-### 3. Access the Application
-Use postman collection ([POSTMAN](https://www.postman.com/alghanmimo/task-manager-ws/collection/75xnrcn/taskmanager))) collection as all listed backend and authorization requests are prepared for testing.
-
-Once all containers are running:
-- **Frontend**: http://localhost:5174
-- **Backend API**: http://localhost:8084/task-management/api/v1
-- **Backend Health**: http://localhost:8084/task-management/actuator/health
-- **Keycloak Admin**: http://localhost:8080/admin (admin/admin123)
-- **Database**: localhost:5433 (postgres/postgres, database: task_manager)
-
-### 4. Login Credentials
-
-**Keycloak Admin:**
-- Username: `admin`
-- Password: `admin123`
-
-**Application Users** (auto-created via Keycloak registration):
-- Users register directly through the application
-- All new users automatically assigned to `default_group` with `manage_task` role
-- User registration is enabled in Keycloak
-
-## 📖 API Documentation
+##  API Documentation
 
 ### Base URL
 ```
@@ -404,7 +391,7 @@ curl -H "Authorization: Bearer <TOKEN>" \
 ## 📁 Project Structure
 
 ```
-task-manager/
+TAM/
 ├── task-app/                 # React Frontend
 │   ├── src/
 │   │   ├── components/       # UI Components
