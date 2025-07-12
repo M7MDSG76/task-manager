@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up JDK 19
+      uses: actions/setup-java@v1
+      with:
+        java-version: 19
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+        
+    - name: Build backend
+      working-directory: ./taskmanager
+      run: ./mvnw clean package -DskipTests
+      
+    - name: Build frontend
+      working-directory: ./task-app
+      run: |
+        npm ci
+        npm run build
+        
+    - name: Build Docker images
+      run: docker-compose -f docker-compose.yml build
+      
+    - name: Create release artifacts
+      run: |
+        mkdir -p release-artifacts
+        cp taskmanager/target/*.jar release-artifacts/
+        tar -czf release-artifacts/frontend-build.tar.gz -C task-app/dist .
+        cp docker-compose.yml release-artifacts/
+        cp README.md release-artifacts/
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release-artifacts/*
+        generate_release_notes: true

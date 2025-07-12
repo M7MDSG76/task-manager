@@ -1,0 +1,41 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up JDK 19
+      uses: actions/setup-java@v1
+      with:
+        java-version: 19
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+        
+    - name: Update Maven dependencies
+      working-directory: ./taskmanager
+      run: ./mvnw versions:use-latest-versions -DallowSnapshots=false
+      
+    - name: Update NPM dependencies
+      working-directory: ./task-app
+      run: |
+        npx npm-check-updates -u
+        npm install
+        
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: 'Update dependencies'
+        title: 'Automated dependency updates'
+        body: 'Automated dependency updates for Maven and NPM packages'
+        branch: dependency-updates
