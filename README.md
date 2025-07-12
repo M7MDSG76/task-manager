@@ -1,4 +1,4 @@
-# Task Management Application (TAM)
+# Task Management 
 
 A modern, full-stack task management system built with React, Spring Boot, PostgreSQL, and Keycloak authentication.
 
@@ -404,7 +404,7 @@ curl -H "Authorization: Bearer <TOKEN>" \
 ## 📁 Project Structure
 
 ```
-TAM/
+task-manager/
 ├── task-app/                 # React Frontend
 │   ├── src/
 │   │   ├── components/       # UI Components
