@@ -3,7 +3,7 @@
 A modern, full-stack task management system built with React, Spring Boot, PostgreSQL, and Keycloak authentication.
 
 ![Project Status](https://img.shields.io/badge/Status-Production%20Ready-green)
-![Frontend](https://1. **postgres** - PostgreSQL database
+![Frontend](**postgres** - PostgreSQL database
    - Port: 5433 (external), 5432 (internal)
    - Volume: `postgres_dev_data`
    - Database: `task_manager`
