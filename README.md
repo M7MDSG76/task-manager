@@ -134,7 +134,7 @@ Before running this project, make sure you have the following installed:
 
 ```bash
 git clone <repository-url>
-cd TAM
+cd task-manager
 ```
 
 ### 2. Start the Application
@@ -148,9 +148,9 @@ docker-compose -f docker-compose.dev.yml ps
 ```
 
 ### 3. Access the Application
+Use postman collection (![POSTMAN]([https://img.shields.io/badge/Backend-Spring%20Boot%203.5-green](https://www.postman.com/alghanmimo/task-manager-ws/collection/75xnrcn/taskmanager))) collection as all listed backend and authorization requests are prepared for testing.
 
 Once all containers are running:
-
 - **Frontend**: http://localhost:5174
 - **Backend API**: http://localhost:8084/task-management/api/v1
 - **Backend Health**: http://localhost:8084/task-management/actuator/health
