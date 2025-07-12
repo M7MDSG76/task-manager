@@ -8,6 +8,13 @@ A modern, full-stack task management system built with React, Spring Boot, Postg
 ![Database](https://img.shields.io/badge/Database-PostgreSQL%2016-blue)
 ![Authentication](https://img.shields.io/badge/Auth-Keycloak%2026.3.1-red)
 
+## Project Required Documnets 
+Required Documnets are within project root files
+- *Database-ERD.md*
+- *README.md*
+- *System-Design-Document.md*
+
+
 ## 🚀 Quick Start
 
 ### Prerequisites
