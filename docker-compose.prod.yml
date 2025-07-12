@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: task-manager-postgres-prod
+    environment:
+      POSTGRES_DB: task_manager
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme123!}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - task-manager-prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    # Don't expose PostgreSQL port in production for security
+    # ports:
+    #   - "5432:5432"
+
+  # Keycloak Authentication Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.1
+    container_name: task-manager-keycloak-prod
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-AdminPassword123!}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme123!}
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
+      KC_HTTP_ENABLED: true
+      KC_HTTPS_ENABLED: false
+    ports:
+      - "8080:8080"  # HTTP port for testing
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - task-manager-prod-network
+    volumes:
+      - keycloak_prod_data:/opt/keycloak/data
+      - ./keycloak-config:/opt/keycloak/data/import
+    command: ["start", "--import-realm"]
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./taskmanager
+      dockerfile: Dockerfile
+    container_name: task-manager-backend-prod
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/task_manager
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-changeme123!}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/task-maneger-realm
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/task-maneger-realm/protocol/openid-connect/certs
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - task-manager-prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8084/task-management/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 512M
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./task-app
+      dockerfile: Dockerfile
+      args:
+        - VITE_KC_URL=https://${KC_HOSTNAME:-localhost}:8443
+        - VITE_KC_REALM=task-maneger-realm
+        - VITE_KC_CLIENT=t-m-client
+        - VITE_API_BASE_URL=http://localhost:8084/task-management/api/v1
+    container_name: task-manager-frontend-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - task-manager-prod-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # Nginx reverse proxy for production (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: task-manager-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-prod.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - task-manager-prod-network
+    restart: unless-stopped
+    profiles:
+      - with-nginx
+
+networks:
+  task-manager-prod-network:
+    driver: bridge
+
+volumes:
+  postgres_prod_data:
+    driver: local
+  keycloak_prod_data:
+    driver: local

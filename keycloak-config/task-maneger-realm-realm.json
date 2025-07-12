@@ -1,0 +1,131 @@
+{
+  "realm": "task-maneger-realm",
+  "enabled": true,
+  "displayName": "Task Manager Realm",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "accessTokenLifespan": 300,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "clients": [
+    {
+      "clientId": "t-m-client",
+      "name": "Task Manager Client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "task-manager-secret",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*",
+        "http://localhost:5174/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "access.token.lifespan": "300",
+        "client_credentials.use_refresh_token": "false"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@taskmanager.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "AdminPassword123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user", "admin"],
+      "groups": ["/default_group"],
+      "attributes": {
+        "locale": ["en"]
+      }
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "email": "user@taskmanager.com",
+      "firstName": "Regular",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "UserPassword123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user"],
+      "groups": ["/default_group"],
+      "attributes": {
+        "locale": ["en"]
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Regular user role"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      },
+      {
+        "name": "manage_task",
+        "description": "Task management role"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "name": "default_group",
+      "path": "/default_group",
+      "realmRoles": ["user", "manage_task"],
+      "attributes": {}
+    }
+  ],
+  "scopeMappings": [],
+  "clientScopeMappings": {},
+  "defaultRoles": ["user"],
+  "defaultGroups": ["/default_group"],
+  "requiredCredentials": ["password"],
+  "passwordPolicy": "length(12) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1)",
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyInitialCounter": 0,
+  "otpPolicyDigits": 6,
+  "otpPolicyLookAheadWindow": 1,
+  "otpPolicyPeriod": 30,
+  "browserFlow": "browser",
+  "registrationFlow": "registration",
+  "directGrantFlow": "direct grant",
+  "resetCredentialsFlow": "reset credentials",
+  "clientAuthenticationFlow": "clients",
+  "attributes": {
+    "frontendUrl": "http://localhost:8080"
+  }
+}

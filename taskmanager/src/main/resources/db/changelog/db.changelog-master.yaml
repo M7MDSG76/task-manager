@@ -1,0 +1,10 @@
+databaseChangeLog:
+    - include:
+        file: scripts/01.create_task_table.sql
+        relativeToChangelogFile: true
+    - include:
+        file: scripts/02.create_user_table.sql
+        relativeToChangelogFile: true
+    - include:
+        file: scripts/03.update_task_table.sql
+        relativeToChangelogFile: true

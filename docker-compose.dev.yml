@@ -1,0 +1,110 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: task-manager-postgres-dev
+    environment:
+      POSTGRES_DB: task_manager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - task-manager-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Keycloak Authentication Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.1
+    container_name: task-manager-keycloak-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - task-manager-dev-network
+    volumes:
+      - keycloak_dev_data:/opt/keycloak/data
+      - ./keycloak-config:/opt/keycloak/data/import
+    command: ["start-dev", "--import-realm"]
+    # healthcheck:
+    #   test: ["CMD", "sh", "-c", "test -f /opt/keycloak/bin/kc.sh || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+
+  # Development services for hot reloading (optional - run backend/frontend locally for development)
+  backend-dev:
+    build:
+      context: ./taskmanager
+      dockerfile: Dockerfile
+    container_name: task-manager-backend-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/task_manager
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080/realms/task-maneger-realm
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/task-maneger-realm/protocol/openid-connect/certs
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - task-manager-dev-network
+    volumes:
+      - ./taskmanager/src:/app/src
+      - ./taskmanager/target:/app/target
+
+  frontend-dev:
+    build:
+      context: ./task-app
+      dockerfile: Dockerfile.dev
+    container_name: task-manager-frontend-dev
+    environment:
+      - VITE_KC_URL=http://localhost:8080
+      - VITE_KC_REALM=task-maneger-realm
+      - VITE_KC_CLIENT=t-m-client
+      - VITE_API_BASE_URL=http://localhost:8084/task-management/api/v1
+    ports:
+      - "5174:5173"
+    depends_on:
+      - backend-dev
+    networks:
+      - task-manager-dev-network
+    volumes:
+      - ./task-app/src:/app/src
+      - ./task-app/public:/app/public
+      - /app/node_modules
+
+networks:
+  task-manager-dev-network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  keycloak_dev_data:
+    driver: local
