@@ -30,38 +30,38 @@ A modern, full-stack task management system built with React, Spring Boot, Postg
 
 ## 🚀 Features
 
-### ✅ Implemented Features (8+/19)
+### ✅ Implemented Features 
 
-#### **User Authentication (2/2)**
+#### **User Authentication**
 - ✅ Secure user registration and login via Keycloak
 - ✅ JWT token-based authentication
 - ✅ OAuth2/OIDC integration
 
-#### **Task Management (3+/3)**
+#### **Task Management**
 - ✅ Create, edit, delete, and view tasks
 - ✅ Task properties: title, description, priority (Low/Medium/High), status (Pending/In-Progress/Completed)
 - ✅ Advanced filtering by priority and status
 - ✅ **Bonus**: Pagination and sorting
 
-#### **API Design (1/1)**
+#### **API Design**
 - ✅ RESTful APIs for all operations
 - ✅ Comprehensive task CRUD operations
 
-#### **Technical Requirements (4/4)**
+#### **Technical Requirements**
 - ✅ Java with Spring Boot framework
 - ✅ Clean, modular, and well-documented code
 - ✅ React frontend with modern UI
 - ✅ Forms for authentication and task management
 
-#### **Database (2/2)**
+#### **Database**
 - ✅ PostgreSQL relational database
 - ✅ Proper schema for user and task data
 
-#### **DevOps (2/2)**
+#### **DevOps**
 - ✅ Docker containerization
 - ✅ Docker Compose environment setup
 
-#### **Documentation (2/2)**
+#### **Documentation**
 - ✅ System Design Document
 - ✅ Database ERD
 
